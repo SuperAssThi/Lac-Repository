@@ -1,0 +1,145 @@
+-- Character Template for "The Strongest Battlegrounds"
+
+local character = {
+    Name = "Void Weaver", -- Replace with your character's name
+    Description = "A master of dimensional manipulation, weaving void energy into devastating attacks.",
+    Health = 1000, -- Adjust health as needed
+    Stamina = 500, -- Adjust stamina as needed
+    Abilities = {
+        Move1 = {
+            Name = "Void Slash",
+            Description = "A quick slash of void energy, dealing moderate damage.",
+            Cooldown = 2, -- Cooldown in seconds
+            StaminaCost = 50,
+            Damage = 150,
+            Animation = "SwordSlash", -- Replace with your animation name
+            Effect = "VoidSlashEffect" -- Replace with your effect name
+        },
+        Move2 = {
+            Name = "Dimensional Shift",
+            Description = "A short-range teleport, useful for evasion or closing gaps.",
+            Cooldown = 5,
+            StaminaCost = 100,
+            Distance = 10, -- Teleport distance
+            Animation = "Teleport",
+            Effect = "DimensionalShiftEffect"
+        },
+        Move3 = {
+            Name = "Void Prison",
+            Description = "Creates a temporary void prison that immobilizes enemies.",
+            Cooldown = 10,
+            StaminaCost = 200,
+            Duration = 3, -- Prison duration in seconds
+            Radius = 5, -- Prison radius
+            Animation = "VoidPrison",
+            Effect = "VoidPrisonEffect"
+        },
+    },
+    Ultimate = {
+        Name = "Reality Collapse",
+        Description = "Summons a massive void rift that deals immense damage and distorts the battlefield.",
+        Cooldown = 30,
+        StaminaCost = 400,
+        Damage = 800,
+        Duration = 5, -- Rift duration
+        Radius = 15, -- Rift radius
+        Animation = "RealityCollapse",
+        Effect = "RealityCollapseEffect"
+    }
+}
+
+-- Example Implementation (Conceptual)
+
+local player = game.Players.LocalPlayer
+local characterModel = player.Character
+
+local lastMoveTime = {}
+local currentStamina = character.Stamina
+
+local function performMove(moveName)
+    local move = character.Abilities[moveName]
+    if not move then return end
+
+    local currentTime = tick()
+    if lastMoveTime[moveName] and currentTime - lastMoveTime[moveName] < move.Cooldown then
+        return -- Cooldown not finished
+    end
+
+    if currentStamina < move.StaminaCost then
+        return -- Not enough stamina
+    end
+
+    currentStamina = currentStamina - move.StaminaCost
+    lastMoveTime[moveName] = currentTime
+
+    -- Play animation (replace with actual animation code)
+    -- local animation = characterModel:FindFirstChild(move.Animation)
+    -- if animation then
+    --     local animationTrack = characterModel.Humanoid:LoadAnimation(animation)
+    --     animationTrack:Play()
+    -- end
+
+    -- Create effect (replace with actual effect code)
+    -- local effect = Instance.new("Part") -- Or particle emitter, etc.
+    -- effect.Name = move.Effect
+    -- effect.Parent = workspace
+    -- ... (set effect properties based on move)
+
+    -- Apply damage/effects (replace with actual damage/effect application code)
+    if move.Damage then
+        -- Apply damage to enemies within range
+    end
+
+    if move.Distance then
+        -- Teleport player
+    end
+
+    if move.Duration then
+        -- Apply immobilize effect, etc.
+    end
+end
+
+local function performUltimate()
+    local ultimate = character.Ultimate
+    local currentTime = tick()
+    if lastMoveTime["Ultimate"] and currentTime - lastMoveTime["Ultimate"] < ultimate.Cooldown then
+        return
+    end
+
+    if currentStamina < ultimate.StaminaCost then
+        return
+    end
+
+    currentStamina = currentStamina - ultimate.StaminaCost
+    lastMoveTime["Ultimate"] = currentTime
+
+    -- Play ultimate animation and effects
+    -- Apply massive damage and battlefield distortion
+end
+
+-- Example Keybinds (replace with your desired keybinds)
+
+local userInputService = game:GetService("UserInputService")
+
+userInputService.InputBegan:Connect(function(input, gameProcessedEvent)
+    if gameProcessedEvent then return end
+
+    if input.KeyCode == Enum.KeyCode.Q then
+        performMove("Move1")
+    elseif input.KeyCode == Enum.KeyCode.E then
+        performMove("Move2")
+    elseif input.KeyCode == Enum.KeyCode.R then
+        performMove("Move3")
+    elseif input.KeyCode == Enum.KeyCode.F then
+        performUltimate()
+    end
+end)
+
+-- Stamina Regeneration (example)
+while true do
+    wait(1)
+    if currentStamina < character.Stamina then
+        currentStamina = math.min(character.Stamina, currentStamina + 50) -- Adjust regeneration rate
+    end
+end
+
