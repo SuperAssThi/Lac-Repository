@@ -1,0 +1,91 @@
+--[[
+README:
+
+This script allows the execution of server-side scripts stored in ServerStorage based on user input.
+
+Usage:
+1. Place this script in ServerScriptService.
+2. Create scripts in ServerStorage that you want to execute.
+3. Add the names of these scripts to the `allowedScripts` table.
+4. Use a RemoteEvent to trigger the execution (e.g., from a GUI button).
+5. Send the desired script name as a string argument to the RemoteEvent.
+
+Security:
+- Only scripts listed in `allowedScripts` can be executed.
+- Input validation prevents execution of arbitrary strings.
+
+Error Handling:
+- Clear error messages are provided for invalid inputs and file not found errors.
+- Errors are logged to the output window.
+
+Performance:
+- Uses `require` for efficient script loading.
+- Avoids unnecessary loops and operations.
+
+Testing:
+- Create a sample script in ServerStorage named "TestScript".
+- Trigger the RemoteEvent with "TestScript" as the argument.
+]]
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerStorage = game:GetService("ServerStorage")
+local RemoteEvent = ReplicatedStorage:WaitForChild("ExecuteScriptEvent") -- Create this RemoteEvent in ReplicatedStorage
+
+-- Whitelist of allowed script names. Add your script names here.
+local allowedScripts = {
+    "TestScript", -- Example script name
+    -- Add more allowed scripts here.
+}
+
+-- Function to execute a script by name.
+local function executeScript(playerName, scriptName)
+    -- Input validation: Check if the script name is allowed.
+    if not table.find(allowedScripts, scriptName) then
+        warn(playerName .. ": Attempted to execute unauthorized script: " .. scriptName)
+        return
+    end
+
+    -- Attempt to find the script in ServerStorage.
+    local scriptToExecute = ServerStorage:FindFirstChild(scriptName)
+
+    if not scriptToExecute then
+        warn(playerName .. ": Script not found: " .. scriptName)
+        return
+    end
+
+    -- Execute the script using require.
+    local success, errorMessage = pcall(function()
+        require(scriptToExecute)
+    end)
+
+    if success then
+        print(playerName .. ": Executed script: " .. scriptName)
+    else
+        warn(playerName .. ": Error executing script: " .. scriptName .. "\n" .. errorMessage)
+    end
+end
+
+-- Listen for the RemoteEvent.
+RemoteEvent.OnServerEvent:Connect(function(player, scriptName)
+    if typeof(scriptName) == "string" then
+        executeScript(player.Name, scriptName)
+    else
+        warn(player.Name .. ": Invalid script name input.")
+    end
+end)
+
+-- Example TestScript (Place this in ServerStorage as "TestScript"):
+-- print("TestScript executed successfully.")
+-- local Players = game:GetService("Players")
+-- for i, player in pairs(Players:GetPlayers()) do
+--      print("Player: " .. player.Name)
+-- end
+
+-- Example client code to fire the remote event (Place this in a LocalScript inside a button):
+-- local ReplicatedStorage = game:GetService("ReplicatedStorage")
+-- local RemoteEvent = ReplicatedStorage:WaitForChild("ExecuteScriptEvent")
+-- local button = script.Parent
+
+-- button.MouseButton1Click:Connect(function()
+--     RemoteEvent:FireServer("TestScript") -- Replace "TestScript" with the desired script name.
+-- end)
